@@ -4,6 +4,11 @@ import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
+
+import static top.b0x0.scheduled.common.CurrentThreadUtils.*;
 
 /**
  * 定时任务的使用
@@ -13,37 +18,27 @@ import java.util.Date;
 @Component
 public class MyDynamicTask {
 
-    public static String currentThreadName() {
-        return Thread.currentThread().getName();
-    }
-
-//    public static void main(String[] args) {
+    public static void main(String[] args) {
 //        String currentMethodName = currentMethodName();
 //        System.out.println("currentMethodName = " + currentMethodName);
 //        String currentClassName = currentClassName();
 //        System.out.println("currentClassName = " + currentClassName);
-//    }
 
-    public static String currentClassName() {
-        String className = Thread.currentThread().getStackTrace()[2].getClassName();
-        int lastIndexOf = className.lastIndexOf(".");
-        return className.substring(lastIndexOf + 1);
+        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
+        int nextInt = threadLocalRandom.nextInt(9999);
+        System.out.println("nextInt = " + nextInt);
+        System.out.printf("%04d%n",new Random().nextInt(9999));
+        System.out.println(" = " + System.currentTimeMillis() + String.format("%04d", ThreadLocalRandom.current().nextInt(9999)));
     }
 
-    public static String currentFullyClassName() {
-        return Thread.currentThread().getStackTrace()[2].getClassName();
-    }
-
-    public static String currentMethodName() {
-        return Thread.currentThread().getStackTrace()[2].getMethodName();
-    }
-
-    public void execute() {
+    public void execute() throws InterruptedException {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Thread.sleep(5000);
         System.out.println("[" + currentThreadName() + "] " + currentClassName() + "." + currentMethodName() + " 现在时间是： " + df.format(new Date()));
     }
 
-    void sayHello() {
+    void sayHello() throws InterruptedException {
+        Thread.sleep(1000);
         System.out.println("[" + currentThreadName() + "] " + currentClassName() + "." + currentMethodName() + " say hello: ManJiis.");
     }
 

@@ -3,7 +3,7 @@ package top.b0x0.scheduled.common;
 import java.util.regex.Pattern;
 
 /**
- * @author TANG
+ * @author ManJiis
  * @since 2021-07-23
  * @since jdk1.8
  */

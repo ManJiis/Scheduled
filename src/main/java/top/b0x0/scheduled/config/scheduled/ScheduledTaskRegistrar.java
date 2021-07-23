@@ -1,13 +1,16 @@
-package top.b0x0.scheduled.config.taskdynamic;
+package top.b0x0.scheduled.config.scheduled;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.stereotype.Component;
+import top.b0x0.scheduled.common.SpringContextUtils;
 import top.b0x0.scheduled.enity.ToolJob;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,17 +25,19 @@ public class ScheduledTaskRegistrar implements DisposableBean {
 
 //    private final Map<Runnable, TaskScheduledFuture> scheduledTasks = new ConcurrentHashMap<>(16);
 
+    private final List<ToolJob> normalStatusJobList = new ArrayList<ToolJob>();
+
     private final Map<ToolJob, Map<Runnable, TaskScheduledFuture>> scheduledTaskMap = new ConcurrentHashMap<>(16);
 
     @Autowired
     private TaskScheduler taskScheduler;
 
-    public TaskScheduler getScheduler() {
-        return this.taskScheduler;
-    }
-
     public Map<ToolJob, Map<Runnable, TaskScheduledFuture>> getScheduledTasks() {
         return this.scheduledTaskMap;
+    }
+
+    public List<ToolJob> getNormalStatusJobList() {
+        return this.normalStatusJobList;
     }
 
     public void addCronTask(ToolJob toolJob, Runnable task, String cronExpression) {
@@ -40,6 +45,7 @@ public class ScheduledTaskRegistrar implements DisposableBean {
     }
 
     private void addCronTaskCore(ToolJob toolJob, CronTask cronTask) {
+        normalStatusJobList.add(toolJob);
         if (cronTask != null && toolJob != null) {
             Runnable task = cronTask.getRunnable();
             if (this.scheduledTaskMap.containsKey(toolJob)) {
@@ -53,8 +59,10 @@ public class ScheduledTaskRegistrar implements DisposableBean {
 
     public void removeCronTask(ToolJob toolJob) {
         Map<Runnable, TaskScheduledFuture> scheduledFutureMap = this.scheduledTaskMap.remove(toolJob);
-
+        normalStatusJobList.remove(toolJob);
         ScheduledRunnable scheduledRunnable = new ScheduledRunnable(toolJob);
+//        ScheduledRunnable scheduledRunnable = SpringContextUtils.getBean(ScheduledRunnable.class);
+        scheduledRunnable.setToolJob(toolJob);
         TaskScheduledFuture taskScheduledFuture = scheduledFutureMap.get(scheduledRunnable);
         if (taskScheduledFuture != null) {
             taskScheduledFuture.cancel();
@@ -74,8 +82,6 @@ public class ScheduledTaskRegistrar implements DisposableBean {
     }
 
     /**
-     * 将定时任务保存在内存中
-     *
      * @param cronTask /
      * @return /
      */

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import top.b0x0.scheduled.common.R;
 import top.b0x0.scheduled.enity.ToolJob;
+import top.b0x0.scheduled.enity.ToolJobReq;
 import top.b0x0.scheduled.service.JobService;
 
 /**
@@ -25,7 +26,7 @@ public class JobController {
 
     @PostMapping("add")
     @ApiOperation("新增")
-    public R addJob(ToolJob job) {
+    public R addJob(@RequestBody ToolJobReq job) {
         return R.ok(jobService.addJob(job));
     }
 
@@ -35,15 +36,15 @@ public class JobController {
         return R.ok(jobService.editJob(job));
     }
 
-    @DeleteMapping("status")
+    @PostMapping("status")
     @ApiOperation("启动/暂停")
-    public R statusJob(ToolJob job) {
+    public R statusJob(@RequestBody ToolJob job) {
         return R.ok(jobService.statusJob(job));
     }
 
-    @DeleteMapping("delete")
+    @PostMapping("delete")
     @ApiOperation("删除")
-    public R deleteJob(ToolJob job) {
+    public R deleteJob(@RequestBody ToolJob job) {
         return R.ok(jobService.deleteJob(job));
     }
 
@@ -53,9 +54,9 @@ public class JobController {
         return R.ok(jobService.listJob());
     }
 
-    @GetMapping("listForRunning")
+    @GetMapping("listNormalStatusJob")
     @ApiOperation("正常状态的定时任务")
-    public R listJobForRunning() {
-        return R.ok(jobService.listJobForRunning());
+    public R listNormalStatusJob() {
+        return R.ok(jobService.listNormalStatusJob());
     }
 }

@@ -1,36 +1,45 @@
 package top.b0x0.scheduled.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import top.b0x0.scheduled.common.ScheduledContains;
-import top.b0x0.scheduled.config.taskdynamic.TaskScheduledFuture;
+import top.b0x0.scheduled.config.scheduled.TaskScheduledFuture;
 import top.b0x0.scheduled.enity.ToolJob;
+import top.b0x0.scheduled.enity.ToolJobReq;
 import top.b0x0.scheduled.mapper.ToolJobMapper;
-import top.b0x0.scheduled.config.taskdynamic.ScheduledTaskRegistrar;
-import top.b0x0.scheduled.config.taskdynamic.ScheduledRunnable;
+import top.b0x0.scheduled.config.scheduled.ScheduledTaskRegistrar;
+import top.b0x0.scheduled.config.scheduled.ScheduledRunnable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * @author TANG
+ * @author ManJiis
  * @since 2021-07-23
  * @since jdk1.8
  */
 @Component
 public class JobService {
+    private static final Logger log = LoggerFactory.getLogger(JobService.class);
 
     @Autowired
-    ToolJobMapper toolJobMapper;
+    private ToolJobMapper toolJobMapper;
 
     @Autowired
-    ScheduledTaskRegistrar scheduledTaskRegistrar;
+    private ScheduledTaskRegistrar scheduledTaskRegistrar;
 
-    public boolean addJob(ToolJob job) {
+    public boolean addJob(ToolJobReq job) {
+        log.info("addJob(): {}", JSON.toJSONString(job));
+
         ToolJob toolJob = toolJobMapper.selectOne(new QueryWrapper<ToolJob>()
                 .eq("job_class_name", job.getJobClassName())
                 .eq("job_method_name", job.getJobMethodName()));
@@ -38,14 +47,18 @@ public class JobService {
         if (toolJob != null) {
             return false;
         }
-        int insert = toolJobMapper.insert(toolJob);
+        ToolJob addToolJob = new ToolJob();
+        BeanUtils.copyProperties(job, addToolJob);
+        String jobId = System.currentTimeMillis() + String.format("%04d", ThreadLocalRandom.current().nextInt(9999));
+        addToolJob.setJobId(jobId);
+        int insert = toolJobMapper.insert(addToolJob);
         if (!(insert > 0)) {
             return false;
         }
         if (job.getJobStatus().equals(ScheduledContains.JOB_STATUS_NORMAL)) {
-            ScheduledRunnable task = new ScheduledRunnable(job);
+            ScheduledRunnable task = new ScheduledRunnable(addToolJob);
 //            scheduledTaskRegistrar.addCronTask(task, job.getCron());
-            scheduledTaskRegistrar.addCronTask(job, task, job.getCron());
+            scheduledTaskRegistrar.addCronTask(addToolJob, task, job.getCron());
         }
         return true;
     }
@@ -127,8 +140,7 @@ public class JobService {
         return toolJobMapper.selectList(new QueryWrapper<>());
     }
 
-    public Object listJobForRunning() {
-        Map<ToolJob, Map<Runnable, TaskScheduledFuture>> scheduledTasks = scheduledTaskRegistrar.getScheduledTasks();
-        return scheduledTasks.keySet().toArray();
+    public List<ToolJob> listNormalStatusJob() {
+        return scheduledTaskRegistrar.getNormalStatusJobList();
     }
 }

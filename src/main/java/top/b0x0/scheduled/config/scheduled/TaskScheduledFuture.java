@@ -1,4 +1,4 @@
-package top.b0x0.scheduled.config.taskdynamic;
+package top.b0x0.scheduled.config.scheduled;
 
 import java.util.concurrent.ScheduledFuture;
 
