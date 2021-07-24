@@ -9,7 +9,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import top.b0x0.scheduled.common.ScheduledContains;
-import top.b0x0.scheduled.config.scheduled.TaskScheduledFuture;
 import top.b0x0.scheduled.enity.ToolJob;
 import top.b0x0.scheduled.enity.ToolJobReq;
 import top.b0x0.scheduled.mapper.ToolJobMapper;
@@ -17,9 +16,6 @@ import top.b0x0.scheduled.config.scheduled.ScheduledTaskRegistrar;
 import top.b0x0.scheduled.config.scheduled.ScheduledRunnable;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**

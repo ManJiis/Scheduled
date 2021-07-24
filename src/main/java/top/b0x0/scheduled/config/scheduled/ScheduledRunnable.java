@@ -91,6 +91,7 @@ public class ScheduledRunnable implements Runnable {
 
             Method method = null;
             if (StringUtils.isNotEmpty(jobMethodParams)) {
+                // TODO 如何判断复杂参数的方法
                 method = target.getClass().getDeclaredMethod(jobMethodName, String.class);
             } else {
                 method = target.getClass().getDeclaredMethod(jobMethodName);

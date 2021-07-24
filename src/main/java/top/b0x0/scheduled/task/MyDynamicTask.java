@@ -27,7 +27,7 @@ public class MyDynamicTask {
         ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
         int nextInt = threadLocalRandom.nextInt(9999);
         System.out.println("nextInt = " + nextInt);
-        System.out.printf("%04d%n",new Random().nextInt(9999));
+        System.out.printf("%04d%n", new Random().nextInt(9999));
         System.out.println(" = " + System.currentTimeMillis() + String.format("%04d", ThreadLocalRandom.current().nextInt(9999)));
     }
 

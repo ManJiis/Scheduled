@@ -36,7 +36,14 @@ public class ToolJob implements Serializable {
      * job名称
      */
     private String jobName;
+    /**
+     * 定时类在spring容器中的名称 例如: MyDynamicTask --> myDynamicTask
+     * 一般是首字母小写
+     */
     private String jobBeanName;
+    /**
+     * 类的全限定名: top.b0x0.scheduled.task.MyDynamicTask
+     */
     private String jobClassName;
     private String jobMethodName;
     private String jobMethodParams;

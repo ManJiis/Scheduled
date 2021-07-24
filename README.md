@@ -2,11 +2,11 @@
 
 Spring 3.0 版本之后自带定时任务，提供了@EnableScheduling注解和@Scheduled注解来实现定时任务功能。
 
-使用SpringBoot创建定时任务非常简单，目前主要有以下三种创建方式：
-
 ## 1. 基于注解（@Scheduled）
 
-> @Scheduled注解和@EnableScheduling注解的使用，基于注解@Scheduled默认为串行执行，默认只有一个单例化的线程池（始终只有一个线程）去处理定时任务;多个任务时，任务的执行时机会受上一个任务执行时间的影响。
+> @Scheduled注解和@EnableScheduling注解的使用，基于注解@Scheduled默认为串行执行，默认只有一个单例化的线程池（始终只有一个线程）去处理定时任务; 多个任务时，任务的执行时机会受上一个任务执行时间的影响。
+> 
+> 配置 ThreadPoolTaskSchedulerConfig  (定时器线程池（ScheduledThreadPoolExecutor）) 即可实现并行处理定时任务
 > > 在线生成Cron表达式的工具：http://cron.qqe2.com/ 来生成自己想要的表达式。
 
 @EnableScheduling注解： 在配置类上使用，开启计划任务的支持（类上）。
@@ -31,7 +31,7 @@ Spring 3.0 版本之后自带定时任务，提供了@EnableScheduling注解和@
     String initialDelayString() default "";     与 initialDelay 意思相同，只是使用字符串的形式。唯一不同的是支持占位符。
 
 
-## 2. 基于接口（SchedulingConfigurer）
+## 2. 使用 Spring ScheduledFuture 实现动态定时任务, 可以对定时任务进行CRUD/启动/暂停
 >  前者相信大家都很熟悉，但是实际使用中我们往往想从数据库中读取指定时间来动态执行定时任务，这时候基于接口的定时任务就派上用场了。
 
 创建数据表
@@ -64,6 +64,3 @@ INSERT INTO `db_test`.`tool_job` (`job_id`, `cron`, `job_name`, `job_bean_name`,
 
 ```
 
-## 3. 并行执行定时任务
-
-配置ScheduledConfig  (定时器线程池（ScheduledThreadPoolExecutor）)
