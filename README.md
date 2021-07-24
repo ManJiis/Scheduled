@@ -31,7 +31,7 @@ Spring 3.0 版本之后自带定时任务，提供了@EnableScheduling注解和@
     String initialDelayString() default "";     与 initialDelay 意思相同，只是使用字符串的形式。唯一不同的是支持占位符。
 
 
-## 2. 使用 Spring ScheduledFuture 实现动态定时任务, 可以对定时任务进行CRUD/启动/暂停
+## 2. 使用 Spring TaskScheduler 实现动态定时任务, 可以对定时任务进行 CRUD / 启动 / 暂停
 >  前者相信大家都很熟悉，但是实际使用中我们往往想从数据库中读取指定时间来动态执行定时任务，这时候基于接口的定时任务就派上用场了。
 
 创建数据表
