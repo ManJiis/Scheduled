@@ -1,15 +1,18 @@
-package top.b0x0.scheduled.config.taskdynamic;
+package top.b0x0.scheduled.config.scheduled;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.stereotype.Component;
 import top.b0x0.scheduled.enity.ToolJob;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * ScheduledTaskRegistrar
@@ -18,21 +21,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2021-07-23
  */
 @Component
-public class ScheduledTaskRegistrar implements DisposableBean {
+public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean {
 
 //    private final Map<Runnable, TaskScheduledFuture> scheduledTasks = new ConcurrentHashMap<>(16);
 
-    private final Map<ToolJob, Map<Runnable, TaskScheduledFuture>> scheduledTaskMap = new ConcurrentHashMap<>(16);
+    private final List<ToolJob> normalStatusJobList = new ArrayList<>();
+
+    private final List<CronTask> cronTaskList = new ArrayList<>();
+
+    private final List<ScheduledFutureTask> scheduledFutureTaskList = new ArrayList<>();
+
+    private final Map<ToolJob, Map<Runnable, ScheduledFutureTask>> scheduledTaskMap = new ConcurrentHashMap<>(16);
 
     @Autowired
-    private TaskScheduler taskScheduler;
+    private org.springframework.scheduling.TaskScheduler taskScheduler;
 
-    public TaskScheduler getScheduler() {
-        return this.taskScheduler;
+    public Map<ToolJob, Map<Runnable, ScheduledFutureTask>> getScheduledTasks() {
+        return this.scheduledTaskMap;
     }
 
-    public Map<ToolJob, Map<Runnable, TaskScheduledFuture>> getScheduledTasks() {
-        return this.scheduledTaskMap;
+    public List<ToolJob> getNormalStatusJobList() {
+        return this.normalStatusJobList;
     }
 
     public void addCronTask(ToolJob toolJob, Runnable task, String cronExpression) {
@@ -45,44 +54,49 @@ public class ScheduledTaskRegistrar implements DisposableBean {
             if (this.scheduledTaskMap.containsKey(toolJob)) {
                 this.removeCronTask(toolJob);
             }
-            Map<Runnable, TaskScheduledFuture> scheduledTasksTmp = new ConcurrentHashMap<>(16);
+            Map<Runnable, ScheduledFutureTask> scheduledTasksTmp = new ConcurrentHashMap<>(16);
             scheduledTasksTmp.put(task, scheduleCronTask(cronTask));
             this.scheduledTaskMap.put(toolJob, scheduledTasksTmp);
+            normalStatusJobList.add(toolJob);
         }
     }
 
     public void removeCronTask(ToolJob toolJob) {
-        Map<Runnable, TaskScheduledFuture> scheduledFutureMap = this.scheduledTaskMap.remove(toolJob);
-
+        Map<Runnable, ScheduledFutureTask> scheduledFutureMap = this.scheduledTaskMap.remove(toolJob);
+//        ScheduledRunnable scheduledRunnable = SpringContextUtils.getBean(ScheduledRunnable.class);
         ScheduledRunnable scheduledRunnable = new ScheduledRunnable(toolJob);
-        TaskScheduledFuture taskScheduledFuture = scheduledFutureMap.get(scheduledRunnable);
-        if (taskScheduledFuture != null) {
-            taskScheduledFuture.cancel();
+        scheduledRunnable.setToolJob(toolJob);
+        ScheduledFutureTask futureTask = scheduledFutureMap.get(scheduledRunnable);
+        if (futureTask != null) {
+            futureTask.cancel();
         }
+        normalStatusJobList.remove(toolJob);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // TODO
     }
 
     @Override
     public void destroy() {
-        Collection<Map<Runnable, TaskScheduledFuture>> values = scheduledTaskMap.values();
-        for (Map<Runnable, TaskScheduledFuture> value : values) {
-            Collection<TaskScheduledFuture> taskScheduledFutures = value.values();
-            for (TaskScheduledFuture taskScheduledFuture : taskScheduledFutures) {
-                taskScheduledFuture.cancel();
+        Collection<Map<Runnable, ScheduledFutureTask>> values = scheduledTaskMap.values();
+        for (Map<Runnable, ScheduledFutureTask> value : values) {
+            Collection<ScheduledFutureTask> scheduledFutureTasks = value.values();
+            for (ScheduledFutureTask futureTask : scheduledFutureTasks) {
+                futureTask.cancel();
             }
         }
         this.scheduledTaskMap.clear();
     }
 
     /**
-     * 将定时任务保存在内存中
-     *
      * @param cronTask /
      * @return /
      */
-    public TaskScheduledFuture scheduleCronTask(CronTask cronTask) {
-        TaskScheduledFuture taskScheduledFuture = new TaskScheduledFuture();
-        taskScheduledFuture.future = this.taskScheduler.schedule(cronTask.getRunnable(), cronTask.getTrigger());
-        return taskScheduledFuture;
+    public ScheduledFutureTask scheduleCronTask(CronTask cronTask) {
+        ScheduledFuture<?> future = this.taskScheduler.schedule(cronTask.getRunnable(), cronTask.getTrigger());
+        return new ScheduledFutureTask(future);
     }
 
 

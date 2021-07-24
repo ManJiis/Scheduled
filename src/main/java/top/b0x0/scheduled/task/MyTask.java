@@ -6,39 +6,37 @@ import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static top.b0x0.scheduled.common.CurrentThreadUtils.currentThreadName;
+
 /**
  * 定时任务的使用
  *
  * @author ManJiis
  **/
-//@Component
+@Component
 public class MyTask {
-
-    public static String getThreadName() {
-        return Thread.currentThread().getName();
-    }
 
     /**
      * 每5秒执行一次
      */
-    @Scheduled(cron = "0/5 * *  * * ? ")
+//    @Scheduled(cron = "0/5 * *  * * ?")
     public void execute() {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println(getThreadName() + "  MyTask.execute() 现在是： " + df.format(new Date()));
+        System.out.println(currentThreadName() + "  MyTask.execute() 现在时间是： " + df.format(new Date()));
     }
 
-    @Scheduled(cron = "${time.cron}")
+    //    @Scheduled(cron = "${time.cron}")
     void testPlaceholder1() {
-        System.out.println(getThreadName() + "  MyTask.testPlaceholder1() Execute at " + System.currentTimeMillis());
+        System.out.println(currentThreadName() + "  MyTask.testPlaceholder1() Execute at " + System.currentTimeMillis());
     }
 
-    @Scheduled(cron = "*/${time.interval} * * * * *")
+    //    @Scheduled(cron = "*/${time.interval} * * * * *")
     void testPlaceholder2() {
-        System.out.println(getThreadName() + "  MyTask.testPlaceholder2() Execute at " + System.currentTimeMillis());
+        System.out.println(currentThreadName() + "  MyTask.testPlaceholder2() Execute at " + System.currentTimeMillis());
     }
 
-    @Scheduled(fixedDelayString = "${time.fixedDelay}")
+    //    @Scheduled(fixedDelayString = "${time.fixedDelay}")
     void testFixedDelayString() {
-        System.out.println(getThreadName() + "  MyTask.testFixedDelayString() 现在是： " + System.currentTimeMillis());
+        System.out.println(currentThreadName() + "  MyTask.testFixedDelayString() 现在是： " + System.currentTimeMillis());
     }
 }

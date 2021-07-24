@@ -1,4 +1,4 @@
-package top.b0x0.scheduled.config;
+package top.b0x0.scheduled.config.scheduled;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,17 +18,12 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @since 2021-07-23
  */
 @Configuration
-public class ScheduledConfig implements SchedulingConfigurer {
-
-    @Autowired
-    @Qualifier("myThreadPoolTaskScheduler")
-    private TaskScheduler myThreadPoolTaskScheduler;
+public class ThreadPoolTaskSchedulerConfig implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        scheduledTaskRegistrar.setTaskScheduler(myThreadPoolTaskScheduler);
+        scheduledTaskRegistrar.setTaskScheduler(myThreadPoolTaskScheduler());
     }
-
 
     @Bean(name = "myThreadPoolTaskScheduler")
     public TaskScheduler myThreadPoolTaskScheduler() {
