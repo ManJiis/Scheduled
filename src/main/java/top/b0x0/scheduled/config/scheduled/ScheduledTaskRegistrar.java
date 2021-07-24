@@ -1,6 +1,7 @@
 package top.b0x0.scheduled.config.scheduled;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ import java.util.concurrent.ScheduledFuture;
  * @since 2021-07-23
  */
 @Component
-public class ScheduledTaskRegistrar implements DisposableBean {
+public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean {
 
 //    private final Map<Runnable, TaskScheduledFuture> scheduledTasks = new ConcurrentHashMap<>(16);
 
@@ -70,6 +71,11 @@ public class ScheduledTaskRegistrar implements DisposableBean {
             futureTask.cancel();
         }
         normalStatusJobList.remove(toolJob);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        // TODO
     }
 
     @Override
